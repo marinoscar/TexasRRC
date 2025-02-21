@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataParser.Core.Entities
 {
-    public class OgOperatorDw
+    public class OgOperatorDw : IRecordScript
     {
         public string OperatorNo { get; set; }             // Index 0 (N)
         public string OperatorName { get; set; }           // Index 1 (Y)

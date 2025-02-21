@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataParser.Core.Entities
 {
-    public class GpCounty
+    public class GpCounty : IRecordScript
     {
         public string CountyNo { get; set; }
         public string CountyFipsCode { get; set; }

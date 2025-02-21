@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataParser.Core.Entities
 {
-    public class OgFieldCycle
+    public class OgFieldCycle : IRecordScript
     {
         public string DistrictNo { get; set; }
         public string FieldNo { get; set; }

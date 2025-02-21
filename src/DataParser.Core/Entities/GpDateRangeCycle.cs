@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataParser.Core.Entities
 {
-    public class GpDateRangeCycle
+    public class GpDateRangeCycle : IRecordScript
     {
         public string OldestProdCycleYearMonth { get; set; }
         public string NewestProdCycleYearMonth { get; set; }

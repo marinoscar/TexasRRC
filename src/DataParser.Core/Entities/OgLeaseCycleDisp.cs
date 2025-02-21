@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataParser.Core.Entities
 {
-    public class OgLeaseCycleDisp
+    public class OgLeaseCycleDisp : IRecordScript
     {
         public string OilGasCode { get; set; }             // Index 0
         public string DistrictNo { get; set; }             // Index 1
