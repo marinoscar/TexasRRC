@@ -50,13 +50,16 @@ namespace DataParser.Core
                     {
                         sb.AppendLine(action(line));
                         counter++;
-                        if (counter > 100)
+                        if (counter > 200)
                         {
+                            _logger.LogInformation($"Adding {counter} records for {file.Name}");
                             RunSql(sb.ToString(), conn);
                             counter = 0;
                             sb.Clear();
                         }
                     });
+                    if(sb.Length > 0)
+                        RunSql(sb.ToString(), conn);
                 }
             }
             catch (Exception ex)

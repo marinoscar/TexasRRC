@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,6 +39,8 @@ namespace DataParser.Core
         {
             try
             {
+                var sw = new Stopwatch();
+                sw.Start();
                 _logger.LogInformation("Starting data load from folder: {FolderName} with filter: {Filter}", folderName, filter);
 
                 var directory = new DirectoryInfo(folderName);
@@ -54,6 +57,8 @@ namespace DataParser.Core
                 }
                 Task.WaitAll(_tasks.ToArray());
                 _logger.LogInformation("Data load completed successfully.");
+                sw.Stop();
+                _logger.LogInformation("Elapsed time: {Elapsed}", sw.Elapsed);
             }
             catch (Exception ex)
             {
