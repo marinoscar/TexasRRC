@@ -94,7 +94,7 @@ namespace DataParser.Core.Entities
 
             for (int i = 0; i < parts.Length; i++)
             {
-                parts[i] = parts[i].Trim();
+                parts[i] = parts[i].Trim().ToSql();
             }
 
             return new OgCountyLeaseCycle
@@ -128,7 +128,7 @@ namespace DataParser.Core.Entities
                 CntyLseCondTotDisp = ParseInt(parts[26]),
                 CntyLseCsgdTotDisp = ParseInt(parts[27]),
                 DistrictName = parts[28],
-                LeaseName = parts[29],
+                LeaseName = parts[29].Replace("'", "''"),
                 OperatorName = parts[30],
                 FieldName = parts[31],
                 CountyName = parts[32]

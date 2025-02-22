@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DataParser": {
+      "commandName": "Project",
+      "commandLineArgs": "/folder \"C:\\Users\\CH489GT\\Downloads\\PDQ_DSV\" /conn \"Server=.\\SQLEXPRESS;Database=TexasOil;Integrated Security=True;TrustServerCertificate=True\""
+    }
+  }
+}

@@ -33,12 +33,19 @@ namespace DataParser.Core
         {
             try
             {
+                var isFirst = true;
+                var count = 0;
                 using (var reader = new StreamReader(file.FullName))
                 {
                     string? line;
                     while ((line = reader.ReadLine()) != null)
                     {
-                        onLineRead(line);
+                        if (isFirst)
+                            isFirst = false;
+                        else
+                            onLineRead(line);
+                        count++;
+                        if (count > 12) return;
                     }
                 }
             }

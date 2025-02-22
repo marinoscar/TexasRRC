@@ -24,42 +24,67 @@ namespace DataParser.Core
             _importerFactory = new ImporterFactory();
         }
 
-
+        /// <summary>
+        /// Executes the import process by reading the source file and running SQL commands.
+        /// </summary>
         public void Execute()
         {
-            var file = new FileInfo(_sourceFilePath);
-            if (!file.Exists)
+            try
             {
-                _logger.LogError($"File not found: {_sourceFilePath}");
-                return;
-            }
-            var action = _importerFactory.Get(file.Name);
-            var reader = new FlatFileReader(_logger);
-            var sb = new StringBuilder();
-            var counter = 0;
-            using (var conn = new SqlConnection(_connectionString))
-            {
-                conn.Open();
-                reader.WhileReadingLine(file, line =>
+                var file = new FileInfo(_sourceFilePath);
+                if (!file.Exists)
                 {
-                    sb.AppendLine(action(line));
-                    counter++;
-                    if (counter > 100)
+                    _logger.LogError($"File not found: {_sourceFilePath}");
+                    return;
+                }
+
+                var action = _importerFactory.Get(file.Name);
+                var reader = new FlatFileReader(_logger);
+                var sb = new StringBuilder();
+                var counter = 0;
+
+                using (var conn = new SqlConnection(_connectionString))
+                {
+                    conn.Open();
+                    reader.WhileReadingLine(file, line =>
                     {
-                        RunSql(sb.ToString(), conn);
-                        counter = 0;
-                        sb.Clear();
-                    }
-                });
+                        sb.AppendLine(action(line));
+                        counter++;
+                        if (counter > 10)
+                        {
+                            RunSql(sb.ToString(), conn);
+                            counter = 0;
+                            sb.Clear();
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred during the import process.");
+                throw;
             }
         }
 
+        /// <summary>
+        /// Executes the given SQL command using the provided database connection.
+        /// </summary>
+        /// <param name="command">The SQL command to execute.</param>
+        /// <param name="connection">The database connection to use.</param>
         private void RunSql(string command, IDbConnection connection)
         {
-            using (var cmd = connection.CreateCommand())
+            try
             {
-                cmd.CommandText = command;
-                cmd.ExecuteNonQuery();
+                using (var cmd = connection.CreateCommand())
+                {
+                    cmd.CommandText = command;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while executing the SQL command.");
+                throw;
             }
         }
     }
