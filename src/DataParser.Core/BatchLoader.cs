@@ -14,6 +14,7 @@ namespace DataParser.Core
     {
         private readonly ILogger _logger;
         private readonly string _connectionString;
+        private readonly List<Task> _tasks = new List<Task>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BatchLoader"/> class.
@@ -49,9 +50,9 @@ namespace DataParser.Core
                 var files = directory.GetFiles(filter, SearchOption.AllDirectories);
                 foreach (var file in files)
                 {
-                    LoadFile(file);
+                    _tasks.Add(Task.Run(() => LoadFile(file)));
                 }
-
+                Task.WaitAll(_tasks.ToArray());
                 _logger.LogInformation("Data load completed successfully.");
             }
             catch (Exception ex)

@@ -34,7 +34,6 @@ namespace DataParser.Core
             try
             {
                 var isFirst = true;
-                var count = 0;
                 using (var reader = new StreamReader(file.FullName))
                 {
                     string? line;
@@ -44,8 +43,6 @@ namespace DataParser.Core
                             isFirst = false;
                         else
                             onLineRead(line);
-                        count++;
-                        if (count > 12) return;
                     }
                 }
             }

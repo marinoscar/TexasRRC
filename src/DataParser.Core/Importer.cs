@@ -50,7 +50,7 @@ namespace DataParser.Core
                     {
                         sb.AppendLine(action(line));
                         counter++;
-                        if (counter > 10)
+                        if (counter > 100)
                         {
                             RunSql(sb.ToString(), conn);
                             counter = 0;
