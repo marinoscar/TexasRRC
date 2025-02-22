@@ -51,7 +51,7 @@ namespace DataParser.Core.Entities
 
             for (int i = 0; i < parts.Length; i++)
             {
-                parts[i] = parts[i].Trim();
+                parts[i] = parts[i].Trim().ToSql();
             }
 
             return new OgRegulatoryLeaseDw
