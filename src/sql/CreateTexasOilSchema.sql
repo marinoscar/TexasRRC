@@ -2796,6 +2796,511 @@ EXEC sys.sp_addextendedproperty
     @level2type = N'COLUMN', @level2name = N'WELLBORE_LOCATION_CODE';
 GO
 
+-------------------------------------------------------------------------------
+-- 1) DROP TABLE IF IT EXISTS
+-------------------------------------------------------------------------------
+IF OBJECT_ID('dbo.OG_WELLBORE_EWA', 'U') IS NOT NULL
+    DROP TABLE dbo.OG_WELLBORE_EWA;
+GO
+
+-------------------------------------------------------------------------------
+-- 2) CREATE TABLE
+-------------------------------------------------------------------------------
+CREATE TABLE [dbo].[OG_WELLBORE_EWA]
+(
+    DISTRICT_CODE                SMALLINT,         -- (1) DISTRICT (a.k.a. DISTRICT_CODE)
+    COUNTY_CODE                  SMALLINT,         -- (2) COUNTY_CODE
+    API_NO                       VARCHAR(8),       -- (3) API_NO (8-digit number stored by RRC)
+    COUNTY_NAME                  VARCHAR(50),      -- (4) COUNTY_NAME
+    OIL_GAS_CODE                 CHAR(1),          -- (5) OIL_GAS_CODE
+    LEASE_NAME                   VARCHAR(32),      -- (6) LEASE_NAME
+    FIELD_NUMBER                 VARCHAR(8),       -- (7) FIELD_NUMBER
+    FIELD_NAME                   VARCHAR(64),      -- (8) FIELD_NAME
+    LEASE_NUMBER                 VARCHAR(10),      -- (9) LEASE_NUMBER
+    WELL_NO_DISPLAY              VARCHAR(25),      -- (10) WELL_NO_DISPLAY
+    OIL_UNIT_NUMBER              VARCHAR(20),      -- (11) OIL_UNIT_NUMBER
+    OPERATOR_NAME                VARCHAR(80),      -- (12) OPERATOR_NAME
+    OPERATOR_NUMBER              CHAR(6),          -- (13) OPERATOR_NUMBER
+    WB_WATER_LAND_CODE           CHAR(1),          -- (14) WB_WATER_LAND_CODE
+    MULTI_COMP_FLAG              CHAR(1),          -- (15) MULTI_COMP_FLAG
+    API_DEPTH                    NUMERIC(9,2),     -- (16) API_DEPTH
+    WB_SHUT_IN_DATE              DATE,             -- (17) WB_SHUT_IN_DATE
+    WB_14B2_FLAG                 CHAR(1),          -- (18) WB_14B2_FLAG
+    WELL_TYPE_NAME               VARCHAR(50),      -- (19) WELL_TYPE_NAME
+    WL_SHUT_IN_DATE              DATE,             -- (20) WL_SHUT_IN_DATE
+    PLUG_DATE                    DATE,             -- (21) PLUG_DATE
+    PLUG_LEASE_NAME              VARCHAR(32),      -- (22) PLUG_LEASE_NAME
+    PLUG_OPERATOR_NAME           VARCHAR(80),      -- (23) PLUG_OPERATOR_NAME
+    RECENT_PERMIT                VARCHAR(10),      -- (24) RECENT_PERMIT
+    RECENT_PERMIT_LEASE_NAME     VARCHAR(32),      -- (25) RECENT_PERMIT_LEASE_NAME
+    RECENT_PERMIT_OPERATOR_NO    CHAR(6),          -- (26) RECENT_PERMIT_OPERATOR_NO
+    ON_SCHEDULE                  CHAR(1),          -- (27) ON_SCHEDULE
+    OG_WELLBORE_EWA_ID           INT,              -- (28) OG_WELLBORE_EWA_ID
+    W2_G1_FILED_DATE             DATE,             -- (29) W2-G1_FILED_DATE
+    W2_G1_DATE                   DATE,             -- (30) W2_G1_DATE
+    COMPLETION_DATE              DATE,             -- (31) COMPLETION_DATE
+    W3_FILE_DATE                 DATE,             -- (32) W3_FILE_DATE
+    CREATED_BY                   VARCHAR(32),      -- (33) CREATED_BY
+    CREATED_DT                   DATETIME,         -- (34) CREATED_DT
+    MODIFIED_BY                  VARCHAR(32),      -- (35) MODIFIED_BY
+    MODIFIED_DT                  DATETIME,         -- (36) MODIFIED_DT
+    WELL_NO                      VARCHAR(25),      -- (37) WELL_NO
+    P5_RENEWAL_MONTH             TINYINT,          -- (38) P5_RENEWAL_MONTH
+    P5_RENEWAL_YEAR              SMALLINT,         -- (39) P5_RENEWAL_YEAR
+    P5_ORG_STATUS                CHAR(1),          -- (40) P5_ORG_STATUS (A, D, X, etc.)
+    CURR_INACT_YRS               INT,              -- (41) CURR_INACT_YRS
+    CURR_INACT_MOS               INT,              -- (42) CURR_INACT_MOS
+    WL_14B2_EXT_STATUS           CHAR(1),          -- (43) WL_14B2_EXT_STATUS
+    WL_14B2_MECH_INTEG           CHAR(1),          -- (44) WL_14B2_MECH_INTEG
+    WL_14B2_PLG_ORD_SF           CHAR(1),          -- (45) WL_14B2_PLG_ORD_SF
+    WL_14B2_POLLUTION            CHAR(1),          -- (46) WL_14B2_POLLUTION
+    WL_14B2_FLDOPS_HOLD          CHAR(1),          -- (47) WL_14B2_FLDOPS_HOLD
+    WL_14B2_H15_PROB             CHAR(1),          -- (48) WL_14B2_H15_PROB
+    WL_14B2_H15_DELQ             CHAR(1),          -- (49) WL_14B2_H15_DELQ
+    WL_14B2_OPER_DELQ            CHAR(1),          -- (50) WL_14B2_OPER_DELQ
+    WL_14B2_DIST_SFP             CHAR(1),          -- (51) WL_14B2_DIST_SFP
+    WL_14B2_DIST_SF_CLNUP        CHAR(1),          -- (52) WL_14B2_DIST_SF_CLNUP
+    WL_14B2_DIST_ST_PLG          CHAR(1),          -- (53) WL_14B2_DIST_ST_PLG
+    WL_14B2_GOOD_FAITH           CHAR(1),          -- (54) WL_14B2_GOOD_FAITH
+    WL_14B2_WELL_OTHER           CHAR(1),          -- (55) WL_14B2_WELL_OTHER
+    SURF_EQP_VIOL                CHAR(1),          -- (56) SURF_EQP_VIOL
+    W3X_VIOL                     CHAR(1),          -- (57) W3X_VIOL
+    H15_STATUS_CODE              CHAR(1),          -- (58) H15_STATUS_CODE
+    ORIG_COMPLETION_DT           DATE              -- (59) ORIG_COMPLETION_DT
+);
+GO
+
+-------------------------------------------------------------------------------
+-- 3) ADD EXTENDED PROPERTIES
+--    Table-level description
+-------------------------------------------------------------------------------
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'OG_WELLBORE_EWA: Table containing Oil & Gas wellbore data from the RRC Online Wellbore Query',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA';
+GO
+
+-------------------------------------------------------------------------------
+-- Column-level descriptions
+-- Each column uses the "Data Field Name" (and short summary) from the PDF
+-------------------------------------------------------------------------------
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(1) RRC District number',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'DISTRICT_CODE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(2) Unique ID assigned to the county',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'COUNTY_CODE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(3) 8-digit API well number (RRC-stored)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'API_NO';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(4) Name of the county where well is located',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'COUNTY_NAME';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(5) Code indicating Oil (O) or Gas (G)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'OIL_GAS_CODE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(6) Lease name (up to 32 chars)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'LEASE_NAME';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(7) RRC Field number (8-digit)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'FIELD_NUMBER';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(8) Name of the field where well is located',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'FIELD_NAME';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(9) Lease number (oil lease# or gas well ID)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'LEASE_NUMBER';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(10) Display version of the well number',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WELL_NO_DISPLAY';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(11) Oil unit number for a multi-well group',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'OIL_UNIT_NUMBER';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(12) Operator of record name',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'OPERATOR_NAME';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(13) Operator number (6-digit)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'OPERATOR_NUMBER';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(14) Code defining water/land location (L, O, B, etc.)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WB_WATER_LAND_CODE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(15) Multi Completion Flag (indicates >1 completion)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'MULTI_COMP_FLAG';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(16) Total well depth',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'API_DEPTH';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(17) Date wellbore became shut in',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WB_SHUT_IN_DATE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(18) Flag if well is inactive (subject to 14B2)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WB_14B2_FLAG';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(19) Current well type (e.g., PRODUCING, SHUT IN)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WELL_TYPE_NAME';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(20) Year/month well is no longer producing',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_SHUT_IN_DATE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(21) Date well is plugged',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'PLUG_DATE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(22) Lease name at time of plugging',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'PLUG_LEASE_NAME';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(23) Operator name at time of plugging',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'PLUG_OPERATOR_NAME';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(24) Most recent drilling permit number',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'RECENT_PERMIT';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(25) Lease name from most recent drilling permit',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'RECENT_PERMIT_LEASE_NAME';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(26) Operator number from most recent drilling permit',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'RECENT_PERMIT_OPERATOR_NO';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(27) On or off proration schedule',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'ON_SCHEDULE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(28) Unique row identifier',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'OG_WELLBORE_EWA_ID';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(29) Date the W-2/G-1 was filed',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'W2_G1_FILED_DATE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(30) Date the W-2 or G-1 was received',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'W2_G1_DATE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(31) Most recent date completion forms (W-2/G-1) completed',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'COMPLETION_DATE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(32) Date the W-3 Plugging Report was filed',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'W3_FILE_DATE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(33) Last user or process that created the row (e.g., EWA Wellbore Ld)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'CREATED_BY';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(34) Date/time the row was created',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'CREATED_DT';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(35) Last user or process that modified the row',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'MODIFIED_BY';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(36) Date/time the row was last modified',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'MODIFIED_DT';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(37) Alphanumeric well number',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WELL_NO';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(38) The P5 renewal month',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'P5_RENEWAL_MONTH';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(39) The P5 renewal year',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'P5_RENEWAL_YEAR';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(40) The status of the P5 organization (A, D, X, etc.)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'P5_ORG_STATUS';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(41) Years the well has been inactive',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'CURR_INACT_YRS';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(42) Months the well has been inactive',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'CURR_INACT_MOS';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(43) Status of a Rule 14(B)(2) extension',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_EXT_STATUS';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(44) Mechanical integrity violation indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_MECH_INTEG';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(45) Plugging order SF hold violation indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_PLG_ORD_SF';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(46) Pollution violation indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_POLLUTION';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(47) Field operations hold violation indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_FLDOPS_HOLD';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(48) H15 form problem indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_H15_PROB';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(49) H15 form delinquency indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_H15_DELQ';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(50) Operator delinquency indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_OPER_DELQ';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(51) District SFP hold violation indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_DIST_SFP';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(52) District SF Cleanup violation indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_DIST_SF_CLNUP';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(53) District state plugging violation indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_DIST_ST_PLG';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(54) Good Faith violation indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_GOOD_FAITH';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(55) Other well violation indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'WL_14B2_WELL_OTHER';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(56) Surface equipment removal violation (W-3C)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'SURF_EQP_VIOL';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(57) Plugging violation (W-3X) indicator',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'W3X_VIOL';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(58) Status code for H15 form (e.g., A, C, D, N)',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'H15_STATUS_CODE';
+
+EXEC sp_addextendedproperty 
+    @name = N'MS_Description',
+    @value = N'(59) Oldest completion date on file, if recorded',
+    @level0type = N'Schema', @level0name = 'dbo',
+    @level1type = N'Table',  @level1name = 'OG_WELLBORE_EWA',
+    @level2type = N'Column', @level2name = 'ORIG_COMPLETION_DT';
+
+GO
+
+
 -- ==============================================================================================
 -- END OF SCRIPT
 -- ==============================================================================================
