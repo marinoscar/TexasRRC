@@ -23,7 +23,7 @@ namespace DataParser.Core
         public void Load()
         {
             var importer = new Importer(_connectionString, _sourceFilePath, _logger);
-            importer.Execute(Guid.NewGuid().ToString());
+            importer.Execute(Guid.NewGuid().ToString(), false);
         }
 
     }

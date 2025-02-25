@@ -29,7 +29,7 @@ namespace DataParser.Core
         /// </summary>
         /// <param name="file">The file to read.</param>
         /// <param name="onLineRead">The action to perform on each line.</param>
-        public void WhileReadingLine(FileInfo file, Action<string> onLineRead)
+        public void WhileReadingLine(FileInfo file, Action<string> onLineRead, bool firstIsHeader = true)
         {
             try
             {
@@ -39,7 +39,11 @@ namespace DataParser.Core
                     string? line;
                     while ((line = reader.ReadLine()) != null)
                     {
-                        if (isFirst)
+                        if (string.IsNullOrEmpty(line))
+                        {
+                            _logger.LogWarning("Empty line found in file: {FileName}", file.FullName);
+                        }
+                            if (isFirst && firstIsHeader)
                             isFirst = false;
                         else
                             onLineRead(line);

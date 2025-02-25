@@ -28,7 +28,7 @@ namespace DataParser.Core
         /// <summary>
         /// Executes the import process by reading the source file and running SQL commands.
         /// </summary>
-        public void Execute(string sessionID)
+        public void Execute(string sessionID, bool firstIsHeader = true)
         {
             try
             {
@@ -39,7 +39,7 @@ namespace DataParser.Core
                     return;
                 }
 
-                if(file.Extension == ".csv")
+                if (file.Extension == ".csv")
                 {
                     _importerFactory.AddWell(file.Name);
                 }
@@ -79,8 +79,8 @@ namespace DataParser.Core
                             counter = 0;
                             sb.Clear();
                         }
-                    });
-                    if(sb.Length > 0)
+                    }, firstIsHeader);
+                    if (sb.Length > 0)
                         RunSql(sb.ToString(), conn);
 
                     // Update progress to 100% and mark as completed

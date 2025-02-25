@@ -2821,7 +2821,7 @@ CREATE TABLE [dbo].[OG_WELLBORE_EWA]
     OIL_UNIT_NUMBER              VARCHAR(20),      -- (11) OIL_UNIT_NUMBER
     OPERATOR_NAME                VARCHAR(80),      -- (12) OPERATOR_NAME
     OPERATOR_NUMBER              CHAR(6),          -- (13) OPERATOR_NUMBER
-    WB_WATER_LAND_CODE           CHAR(1),          -- (14) WB_WATER_LAND_CODE
+    WB_WATER_LAND_CODE           VARCHAR(50),          -- (14) WB_WATER_LAND_CODE
     MULTI_COMP_FLAG              CHAR(1),          -- (15) MULTI_COMP_FLAG
     API_DEPTH                    NUMERIC(9,2),     -- (16) API_DEPTH
     WB_SHUT_IN_DATE              DATE,             -- (17) WB_SHUT_IN_DATE

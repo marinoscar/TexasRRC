@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataParser.Core.Entities
 {
+
     public class OGWellboreEwa : IRecordScript
     {
         // --------------------------------------------------------------------
@@ -39,10 +40,7 @@ namespace DataParser.Core.Entities
         public string RecentPermitLeaseName { get; set; }    // (25)
         public string RecentPermitOperatorNo { get; set; }   // (26)
         public string OnSchedule { get; set; }               // (27)
-
-        // Now a regular property, not identity
-        public int OgWellboreEwaId { get; set; }             // (28)
-
+        public int OgWellboreEwaId { get; set; }             // (28) Not an identity in this version
         public DateTime? W2G1FiledDate { get; set; }         // (29)
         public DateTime? W2G1Date { get; set; }              // (30)
         public DateTime? CompletionDate { get; set; }        // (31)
@@ -87,7 +85,7 @@ namespace DataParser.Core.Entities
             string[] tokens = text.Split(new[] { separator }, StringSplitOptions.None)
                 .Select(i => i.Trim().ToSql().Replace(@"""", "")).ToArray();
 
-            // We expect 59 fields as per the PDF
+            // We expect 59 fields
             if (tokens.Length < 59)
             {
                 throw new ArgumentException($"Expected 59 columns in the CSV line, but got {tokens.Length}.");
@@ -161,12 +159,10 @@ namespace DataParser.Core.Entities
 
         // --------------------------------------------------------------------
         // 3) ToSqlInsert: returns an INSERT statement for the table
+        //    Now includes inline comments referencing CSV index + property name
         // --------------------------------------------------------------------
         public string ToSqlInsert()
         {
-            // We now include OG_WELLBORE_EWA_ID in our column/VALUES list
-            // Use single quotes for strings/dates, handle nulls, etc.
-
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine("INSERT INTO [dbo].[OG_WELLBORE_EWA] (");
@@ -231,65 +227,69 @@ namespace DataParser.Core.Entities
             sb.AppendLine("    ORIG_COMPLETION_DT");
             sb.AppendLine(") VALUES (");
 
-            sb.AppendLine($"    {FormatShort(DistrictCode)},");
-            sb.AppendLine($"    {FormatShort(CountyCode)},");
-            sb.AppendLine($"    {FormatString(ApiNo)},");
-            sb.AppendLine($"    {FormatString(CountyName)},");
-            sb.AppendLine($"    {FormatString(OilGasCode)},");
-            sb.AppendLine($"    {FormatString(LeaseName)},");
-            sb.AppendLine($"    {FormatString(FieldNumber)},");
-            sb.AppendLine($"    {FormatString(FieldName)},");
-            sb.AppendLine($"    {FormatString(LeaseNumber)},");
-            sb.AppendLine($"    {FormatString(WellNoDisplay)},");
-            sb.AppendLine($"    {FormatString(OilUnitNumber)},");
-            sb.AppendLine($"    {FormatString(OperatorName)},");
-            sb.AppendLine($"    {FormatString(OperatorNumber)},");
-            sb.AppendLine($"    {FormatString(WbWaterLandCode)},");
-            sb.AppendLine($"    {FormatString(MultiCompFlag)},");
-            sb.AppendLine($"    {FormatDecimal(ApiDepth)},");
-            sb.AppendLine($"    {FormatDate(WbShutInDate)},");
-            sb.AppendLine($"    {FormatString(Wb14B2Flag)},");
-            sb.AppendLine($"    {FormatString(WellTypeName)},");
-            sb.AppendLine($"    {FormatDate(WlShutInDate)},");
-            sb.AppendLine($"    {FormatDate(PlugDate)},");
-            sb.AppendLine($"    {FormatString(PlugLeaseName)},");
-            sb.AppendLine($"    {FormatString(PlugOperatorName)},");
-            sb.AppendLine($"    {FormatString(RecentPermit)},");
-            sb.AppendLine($"    {FormatString(RecentPermitLeaseName)},");
-            sb.AppendLine($"    {FormatString(RecentPermitOperatorNo)},");
-            sb.AppendLine($"    {FormatString(OnSchedule)},");
-            sb.AppendLine($"    {FormatInt(OgWellboreEwaId)},");
-            sb.AppendLine($"    {FormatDate(W2G1FiledDate)},");
-            sb.AppendLine($"    {FormatDate(W2G1Date)},");
-            sb.AppendLine($"    {FormatDate(CompletionDate)},");
-            sb.AppendLine($"    {FormatDate(W3FileDate)},");
-            sb.AppendLine($"    {FormatString(CreatedBy)},");
-            sb.AppendLine($"    {FormatDateTime(CreatedDt)},");
-            sb.AppendLine($"    {FormatString(ModifiedBy)},");
-            sb.AppendLine($"    {FormatDateTime(ModifiedDt)},");
-            sb.AppendLine($"    {FormatString(WellNo)},");
-            sb.AppendLine($"    {FormatByte(P5RenewalMonth)},");
-            sb.AppendLine($"    {FormatShort(P5RenewalYear)},");
-            sb.AppendLine($"    {FormatString(P5OrgStatus)},");
-            sb.AppendLine($"    {FormatInt(CurrInactYrs)},");
-            sb.AppendLine($"    {FormatInt(CurrInactMos)},");
-            sb.AppendLine($"    {FormatString(Wl14B2ExtStatus)},");
-            sb.AppendLine($"    {FormatString(Wl14B2MechInteg)},");
-            sb.AppendLine($"    {FormatString(Wl14B2PlgOrdSf)},");
-            sb.AppendLine($"    {FormatString(Wl14B2Pollution)},");
-            sb.AppendLine($"    {FormatString(Wl14B2FldopsHold)},");
-            sb.AppendLine($"    {FormatString(Wl14B2H15Prob)},");
-            sb.AppendLine($"    {FormatString(Wl14B2H15Delq)},");
-            sb.AppendLine($"    {FormatString(Wl14B2OperDelq)},");
-            sb.AppendLine($"    {FormatString(Wl14B2DistSfp)},");
-            sb.AppendLine($"    {FormatString(Wl14B2DistSfClnup)},");
-            sb.AppendLine($"    {FormatString(Wl14B2DistStPlg)},");
-            sb.AppendLine($"    {FormatString(Wl14B2GoodFaith)},");
-            sb.AppendLine($"    {FormatString(Wl14B2WellOther)},");
-            sb.AppendLine($"    {FormatString(SurfEqpViol)},");
-            sb.AppendLine($"    {FormatString(W3XViol)},");
-            sb.AppendLine($"    {FormatString(H15StatusCode)},");
-            sb.AppendLine($"    {FormatDate(OrigCompletionDate)}");
+            // Each line includes a trailing comma (except the last) plus a comment
+            // referencing CSV index + property name.
+
+            sb.AppendLine($"    {FormatShort(DistrictCode)},  -- CSV[0] DistrictCode");
+            sb.AppendLine($"    {FormatShort(CountyCode)},   -- CSV[1] CountyCode");
+            sb.AppendLine($"    {FormatString(ApiNo)},       -- CSV[2] ApiNo");
+            sb.AppendLine($"    {FormatString(CountyName)},  -- CSV[3] CountyName");
+            sb.AppendLine($"    {FormatString(OilGasCode)},  -- CSV[4] OilGasCode");
+            sb.AppendLine($"    {FormatString(LeaseName)},   -- CSV[5] LeaseName");
+            sb.AppendLine($"    {FormatString(FieldNumber)}, -- CSV[6] FieldNumber");
+            sb.AppendLine($"    {FormatString(FieldName)},   -- CSV[7] FieldName");
+            sb.AppendLine($"    {FormatString(LeaseNumber)}, -- CSV[8] LeaseNumber");
+            sb.AppendLine($"    {FormatString(WellNoDisplay)}, -- CSV[9] WellNoDisplay");
+            sb.AppendLine($"    {FormatString(OilUnitNumber)}, -- CSV[10] OilUnitNumber");
+            sb.AppendLine($"    {FormatString(OperatorName)}, -- CSV[11] OperatorName");
+            sb.AppendLine($"    {FormatString(OperatorNumber)}, -- CSV[12] OperatorNumber");
+            sb.AppendLine($"    {FormatString(WbWaterLandCode)}, -- CSV[13] WbWaterLandCode");
+            sb.AppendLine($"    {FormatString(MultiCompFlag)}, -- CSV[14] MultiCompFlag");
+            sb.AppendLine($"    {FormatDecimal(ApiDepth)},   -- CSV[15] ApiDepth");
+            sb.AppendLine($"    {FormatDate(WbShutInDate)},  -- CSV[16] WbShutInDate");
+            sb.AppendLine($"    {FormatString(Wb14B2Flag)},  -- CSV[17] Wb14B2Flag");
+            sb.AppendLine($"    {FormatString(WellTypeName)}, -- CSV[18] WellTypeName");
+            sb.AppendLine($"    {FormatDate(WlShutInDate)},  -- CSV[19] WlShutInDate");
+            sb.AppendLine($"    {FormatDate(PlugDate)},      -- CSV[20] PlugDate");
+            sb.AppendLine($"    {FormatString(PlugLeaseName)}, -- CSV[21] PlugLeaseName");
+            sb.AppendLine($"    {FormatString(PlugOperatorName)}, -- CSV[22] PlugOperatorName");
+            sb.AppendLine($"    {FormatString(RecentPermit)}, -- CSV[23] RecentPermit");
+            sb.AppendLine($"    {FormatString(RecentPermitLeaseName)}, -- CSV[24] RecentPermitLeaseName");
+            sb.AppendLine($"    {FormatString(RecentPermitOperatorNo)}, -- CSV[25] RecentPermitOperatorNo");
+            sb.AppendLine($"    {FormatString(OnSchedule)},  -- CSV[26] OnSchedule");
+            sb.AppendLine($"    {FormatInt(OgWellboreEwaId)}, -- CSV[27] OgWellboreEwaId");
+            sb.AppendLine($"    {FormatDate(W2G1FiledDate)}, -- CSV[28] W2G1FiledDate");
+            sb.AppendLine($"    {FormatDate(W2G1Date)},      -- CSV[29] W2G1Date");
+            sb.AppendLine($"    {FormatDate(CompletionDate)}, -- CSV[30] CompletionDate");
+            sb.AppendLine($"    {FormatDate(W3FileDate)},    -- CSV[31] W3FileDate");
+            sb.AppendLine($"    {FormatString(CreatedBy)},   -- CSV[32] CreatedBy");
+            sb.AppendLine($"    {FormatDateTime(CreatedDt)}, -- CSV[33] CreatedDt");
+            sb.AppendLine($"    {FormatString(ModifiedBy)},  -- CSV[34] ModifiedBy");
+            sb.AppendLine($"    {FormatDateTime(ModifiedDt)}, -- CSV[35] ModifiedDt");
+            sb.AppendLine($"    {FormatString(WellNo)},      -- CSV[36] WellNo");
+            sb.AppendLine($"    {FormatByte(P5RenewalMonth)}, -- CSV[37] P5RenewalMonth");
+            sb.AppendLine($"    {FormatShort(P5RenewalYear)}, -- CSV[38] P5RenewalYear");
+            sb.AppendLine($"    {FormatString(P5OrgStatus)}, -- CSV[39] P5OrgStatus");
+            sb.AppendLine($"    {FormatInt(CurrInactYrs)},   -- CSV[40] CurrInactYrs");
+            sb.AppendLine($"    {FormatInt(CurrInactMos)},   -- CSV[41] CurrInactMos");
+            sb.AppendLine($"    {FormatString(Wl14B2ExtStatus)}, -- CSV[42] Wl14B2ExtStatus");
+            sb.AppendLine($"    {FormatString(Wl14B2MechInteg)}, -- CSV[43] Wl14B2MechInteg");
+            sb.AppendLine($"    {FormatString(Wl14B2PlgOrdSf)}, -- CSV[44] Wl14B2PlgOrdSf");
+            sb.AppendLine($"    {FormatString(Wl14B2Pollution)}, -- CSV[45] Wl14B2Pollution");
+            sb.AppendLine($"    {FormatString(Wl14B2FldopsHold)}, -- CSV[46] Wl14B2FldopsHold");
+            sb.AppendLine($"    {FormatString(Wl14B2H15Prob)}, -- CSV[47] Wl14B2H15Prob");
+            sb.AppendLine($"    {FormatString(Wl14B2H15Delq)}, -- CSV[48] Wl14B2H15Delq");
+            sb.AppendLine($"    {FormatString(Wl14B2OperDelq)}, -- CSV[49] Wl14B2OperDelq");
+            sb.AppendLine($"    {FormatString(Wl14B2DistSfp)}, -- CSV[50] Wl14B2DistSfp");
+            sb.AppendLine($"    {FormatString(Wl14B2DistSfClnup)}, -- CSV[51] Wl14B2DistSfClnup");
+            sb.AppendLine($"    {FormatString(Wl14B2DistStPlg)}, -- CSV[52] Wl14B2DistStPlg");
+            sb.AppendLine($"    {FormatString(Wl14B2GoodFaith)}, -- CSV[53] Wl14B2GoodFaith");
+            sb.AppendLine($"    {FormatString(Wl14B2WellOther)}, -- CSV[54] Wl14B2WellOther");
+            sb.AppendLine($"    {FormatString(SurfEqpViol)},   -- CSV[55] SurfEqpViol");
+            sb.AppendLine($"    {FormatString(W3XViol)},       -- CSV[56] W3XViol");
+            sb.AppendLine($"    {FormatString(H15StatusCode)}, -- CSV[57] H15StatusCode");
+            // No trailing comma on the very last line
+            sb.AppendLine($"    {FormatDate(OrigCompletionDate)} -- CSV[58] OrigCompletionDate");
             sb.AppendLine(");");
 
             return sb.ToString();
@@ -328,8 +328,7 @@ namespace DataParser.Core.Entities
         // --------------------------------------------------------------------
         private static string FormatShort(short value)
         {
-            // If you allow zero as a valid value, you can remove the "NULL" logic.
-            // This example treats 0 as "no data" => "NULL"
+            // If you consider 0 a valid value, remove or alter the "NULL" fallback.
             return value == 0 ? "NULL" : value.ToString();
         }
 
@@ -345,8 +344,9 @@ namespace DataParser.Core.Entities
 
         private static string FormatDecimal(decimal value)
         {
-            // Adjust if 0.0 is valid. Currently, 0m => "0" instead of "NULL".
-            // If you treat 0 as "NULL," do: return value == 0m ? "NULL" : value.ToString("0.##");
+            // Adjust if 0.0 is valid. 
+            // Currently just outputs the numeric value as "0.##"
+            // If you want 0 => "NULL", do: return value == 0m ? "NULL" : value.ToString("0.##");
             return value.ToString("0.##");
         }
 
@@ -372,3 +372,5 @@ namespace DataParser.Core.Entities
         }
     }
 }
+
+
