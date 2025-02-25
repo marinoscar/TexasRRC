@@ -33,7 +33,9 @@ namespace DataParser
             var connStr = arguments["/conn"];
             var folder = arguments["/folder"];
             var loader = new BatchLoader(connStr, logger);
-            loader.LoadData(folder);
+            var wellLoader = new WellLoader(connStr, "C:\\Users\\CH489GT\\Downloads\\PDQ_DSV\\OG_WELLBORE_EWA_Report_2025-02-04.csv", logger);
+            wellLoader.Load();
+            //loader.LoadData(folder);
         }
 
         /// <summary>

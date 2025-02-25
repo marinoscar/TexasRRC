@@ -85,7 +85,7 @@ namespace DataParser.Core.Entities
 
             // Split by the chosen separator
             string[] tokens = text.Split(new[] { separator }, StringSplitOptions.None)
-                .Select(i => i.Trim().ToSql()).ToArray();
+                .Select(i => i.Trim().ToSql().Replace(@"""", "")).ToArray();
 
             // We expect 59 fields as per the PDF
             if (tokens.Length < 59)

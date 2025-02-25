@@ -55,7 +55,7 @@ namespace DataParser.Core
                 var wellFile = GetWellFile(directory);
                 if(wellFile != null)
                 {
-                    files.Add(wellFile);
+                    files.Insert(0, wellFile);
 
                 }
                 foreach (var file in files)
