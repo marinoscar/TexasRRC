@@ -3322,6 +3322,39 @@ CREATE TABLE ImportProgress (
 CREATE INDEX IDX_ImportProgress_SessionID_FileName ON ImportProgress(SessionID, FileName);
 
 
+-- Drop the view if it already exists
+IF OBJECT_ID('dbo.VW_ImportProgress', 'V') IS NOT NULL
+    DROP VIEW dbo.VW_ImportProgress;
+GO
+
+-- Create the view
+CREATE VIEW dbo.VW_ImportProgress AS
+SELECT 
+    [ID],
+    [SessionID],
+    [FileName],
+    [Progress],
+    DATEDIFF(MINUTE, StartTime, ISNULL(EndTime, UpdatedAt)) AS DurationInMinutes,
+    
+    -- Predict Completion Time
+    CASE 
+        WHEN Progress > 0 THEN DATEADD(SECOND, 
+                DATEDIFF(SECOND, StartTime, ISNULL(EndTime, UpdatedAt)) * (100 - Progress) / Progress, 
+                ISNULL(EndTime, UpdatedAt))
+        ELSE NULL 
+    END AS EstimatedCompletionTime,
+    
+    [Status],
+    [StartTime],
+    [EndTime],
+    [CreatedAt],
+    [UpdatedAt]
+FROM 
+    [dbo].[ImportProgress];
+GO
+
+
+
 
 -- ==============================================================================================
 -- END OF SCRIPT

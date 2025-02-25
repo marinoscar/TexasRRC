@@ -15,8 +15,8 @@ namespace DataParser.Core.Entities
         public decimal Progress { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
         public string ToSqlInsert()
         {
@@ -37,7 +37,7 @@ namespace DataParser.Core.Entities
             Progress = {Progress}, 
             StartTime = {(StartTime.HasValue ? $"'{StartTime.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, 
             EndTime = {(EndTime.HasValue ? $"'{EndTime.Value:yyyy-MM-dd HH:mm:ss}'" : "NULL")}, 
-            UpdatedAt = '{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss}'
+            UpdatedAt = '{DateTime.Now:yyyy-MM-dd HH:mm:ss}'
         WHERE SessionID = '{SessionID}' AND FileName = '{FileName}';
         ";
         }

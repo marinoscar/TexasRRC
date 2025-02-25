@@ -70,7 +70,6 @@ namespace DataParser.Core
                             _logger.LogInformation($"Adding {counter} records for {file.Name}");
                             RunSql(sb.ToString(), conn);
                             importStatus.Progress = ((decimal)totalBytes / fileSize) * 100;
-                            importStatus.UpdatedAt = DateTime.Now;
                             RunSql(importStatus.ToSqlUpdate(), conn);
                             counter = 0;
                             sb.Clear();
