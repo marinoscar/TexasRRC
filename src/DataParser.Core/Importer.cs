@@ -39,6 +39,11 @@ namespace DataParser.Core
                     return;
                 }
 
+                if(file.Extension == ".csv")
+                {
+                    _importerFactory.AddWell(file.Name);
+                }
+
                 var action = _importerFactory.Get(file.Name);
                 var reader = new FlatFileReader(_logger);
                 var sb = new StringBuilder();

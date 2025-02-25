@@ -42,7 +42,7 @@ namespace DataParser.Core
                 var sessionId = Guid.NewGuid().ToString();
                 var sw = new Stopwatch();
                 sw.Start();
-                _logger.LogInformation("Starting data load from folder: {FolderName} with filter: {Filter}", folderName, filter);
+                _logger.LogInformation("Starting data load from folder: {FolderName}", folderName);
 
                 var directory = new DirectoryInfo(folderName);
                 if (!directory.Exists)
@@ -51,7 +51,13 @@ namespace DataParser.Core
                     throw new DirectoryNotFoundException($"Directory not found: {folderName}");
                 }
 
-                var files = directory.GetFiles(filter, SearchOption.AllDirectories);
+                var files = directory.GetFiles("*.dsv", SearchOption.AllDirectories).ToList();
+                var wellFile = GetWellFile(directory);
+                if(wellFile != null)
+                {
+                    files.Add(wellFile);
+
+                }
                 foreach (var file in files)
                 {
                     _tasks.Add(Task.Run(() => LoadFile(file, sessionId)));
@@ -66,6 +72,11 @@ namespace DataParser.Core
                 _logger.LogError(ex, "An error occurred while loading data.");
                 throw;
             }
+        }
+
+        private FileInfo GetWellFile(DirectoryInfo directory)
+        {
+            return directory.GetFiles("*.csv").OrderByDescending(f => f.LastWriteTime).FirstOrDefault();
         }
 
         private void LoadFile(FileInfo file, string sessionId)
