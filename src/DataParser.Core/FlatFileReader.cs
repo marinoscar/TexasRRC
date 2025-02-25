@@ -42,8 +42,9 @@ namespace DataParser.Core
                         if (string.IsNullOrEmpty(line))
                         {
                             _logger.LogWarning("Empty line found in file: {FileName}", file.FullName);
+                            continue;
                         }
-                            if (isFirst && firstIsHeader)
+                        if (isFirst && firstIsHeader)
                             isFirst = false;
                         else
                             onLineRead(line);

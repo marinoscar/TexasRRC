@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,7 +29,7 @@ namespace DataParser.Core
         /// <summary>
         /// Executes the import process by reading the source file and running SQL commands.
         /// </summary>
-        public void Execute(string sessionID, bool firstIsHeader = true)
+        public void Execute(SessionState sessionState, bool firstIsHeader = true)
         {
             try
             {
@@ -44,19 +45,22 @@ namespace DataParser.Core
                     _importerFactory.AddWell(file.Name);
                 }
 
+                var sessionFile = sessionState.Files.First(i => i.FileName == file.Name);
+
                 var action = _importerFactory.Get(file.Name);
                 var reader = new FlatFileReader(_logger);
                 var sb = new StringBuilder();
-                var counter = 0;
+                ulong counter = 0;
                 var fileSize = file.Length;
                 var totalBytes = 0l;
                 var importStatus = new ImportProgress()
                 {
-                    SessionID = sessionID,
+                    SessionID = sessionState.SessionId,
                     FileName = file.Name,
                     Status = "In Progress",
                     StartTime = DateTime.Now,
-                    Progress = 0
+                    Progress = 0,
+                    TotalBytes = 0
                 };
                 using (var conn = new SqlConnection(_connectionString))
                 {
@@ -65,11 +69,19 @@ namespace DataParser.Core
                     //sets the status to inprogress
                     RunSql(importStatus.ToSqlInsert(), conn);
 
+
+                    var retries = 0;
+
                     reader.WhileReadingLine(file, line =>
                     {
-                        totalBytes += line.Length;
-                        sb.AppendLine(action(line));
                         counter++;
+                        totalBytes += line.Length;
+
+                        // check for rows to skip
+                        if (counter < sessionFile.RecordCount) return;
+
+                        sb.AppendLine(action(line));
+
                         if (counter > 500)
                         {
                             _logger.LogInformation($"Adding {counter} records for {file.Name}");
@@ -79,6 +91,9 @@ namespace DataParser.Core
                             counter = 0;
                             sb.Clear();
                         }
+
+                        sessionFile.RecordCount = counter;
+
                     }, firstIsHeader);
                     if (sb.Length > 0)
                         RunSql(sb.ToString(), conn);
@@ -105,18 +120,32 @@ namespace DataParser.Core
         /// <param name="connection">The database connection to use.</param>
         private void RunSql(string command, IDbConnection connection)
         {
-            try
+            var retries = 0;
+            while (retries < 3)
             {
-                using (var cmd = connection.CreateCommand())
+                try
                 {
-                    cmd.CommandText = command;
-                    cmd.ExecuteNonQuery();
+                    if (connection.State != ConnectionState.Open) 
+                        connection.Open();
+
+                    using (var cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = command;
+                        cmd.ExecuteNonQuery();
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while executing the SQL command.");
-                throw;
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while executing the SQL command.");
+                    if (retries < 3)
+                    {
+                        retries++;
+                        _logger.LogWarning($"Retrying SQL command. Retry count: {retries}");
+                        connection.Close();
+                    }
+                    else throw;
+                }
+                return;
             }
         }
     }

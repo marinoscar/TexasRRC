@@ -3312,6 +3312,7 @@ CREATE TABLE ImportProgress (
     FileName NVARCHAR(255) NOT NULL,
     Status NVARCHAR(50) CHECK (Status IN ('Pending', 'In Progress', 'Completed', 'Failed')) NOT NULL,
     Progress DECIMAL(5,2) CHECK (Progress BETWEEN 0 AND 100) NOT NULL DEFAULT 0,
+	TotalBytes BIGINT NULL,
     StartTime DATETIME2 NULL,
     EndTime DATETIME2 NULL,
     CreatedAt DATETIME2 DEFAULT SYSDATETIME(),
@@ -3345,6 +3346,7 @@ SELECT
     END AS EstimatedCompletionTime,
     
     [Status],
+	[TotalBytes],
     [StartTime],
     [EndTime],
     [CreatedAt],

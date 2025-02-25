@@ -1,9 +1,11 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using DataParser.Core.Entities;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace DataParser.Core
@@ -37,9 +39,11 @@ namespace DataParser.Core
         /// <exception cref="DirectoryNotFoundException">Thrown when the specified directory does not exist.</param>
         public void LoadData(string folderName, string filter = "*.dsv")
         {
+            var sessionState = new SessionState();
             try
+
             {
-                var sessionId = Guid.NewGuid().ToString();
+                
                 var sw = new Stopwatch();
                 sw.Start();
                 _logger.LogInformation("Starting data load from folder: {FolderName}", folderName);
@@ -52,15 +56,18 @@ namespace DataParser.Core
                 }
 
                 var files = directory.GetFiles("*.dsv", SearchOption.AllDirectories).ToList();
+                sessionState.Files = files.Select(f => new FileState() { FileName = f.Name }).ToList();
+
                 var wellFile = GetWellFile(directory);
                 if(wellFile != null)
                 {
                     files.Insert(0, wellFile);
-
+                    sessionState.Files.Add(new FileState() { FileName = wellFile.Name, HasHeader = false });
                 }
+
                 foreach (var file in files)
                 {
-                    _tasks.Add(Task.Run(() => LoadFile(file, sessionId)));
+                    _tasks.Add(Task.Run(() => LoadFile(file, sessionState)));
                 }
                 Task.WaitAll(_tasks.ToArray());
                 _logger.LogInformation("Data load completed successfully.");
@@ -69,6 +76,8 @@ namespace DataParser.Core
             }
             catch (Exception ex)
             {
+                sessionState.Exception = ex.ToString();
+                File.WriteAllText("sessionState.json", JsonSerializer.Serialize(sessionState));
                 _logger.LogError(ex, "An error occurred while loading data.");
                 throw;
             }
@@ -79,11 +88,11 @@ namespace DataParser.Core
             return directory.GetFiles("*.csv").OrderByDescending(f => f.LastWriteTime).FirstOrDefault();
         }
 
-        private void LoadFile(FileInfo file, string sessionId)
+        private void LoadFile(FileInfo file, SessionState sessionState)
         {
             _logger.LogInformation("Processing file: {FileName}", file.FullName);
             var importer = new Importer(_connectionString, file.FullName, _logger);
-            importer.Execute(sessionId);
+            importer.Execute(sessionState);
         }
     }
 }
