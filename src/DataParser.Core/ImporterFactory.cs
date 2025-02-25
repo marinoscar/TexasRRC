@@ -25,6 +25,11 @@ namespace DataParser.Core
             return _factory[fileName];
         }
 
+        public void AddWell(string fileName)
+        {
+            _factory.Add(fileName, (text) => OGWellboreEwa.CreateFromText(text).ToSqlInsert());
+        }
+
         private void Load() {
             _factory.Add("GP_COUNTY_DATA_TABLE.dsv", (text) => GpCounty.CreateFromText(text).ToSqlInsert());
             _factory.Add("GP_DATE_RANGE_CYCLE_DATA_TABLE.dsv", (text) => GpDateRangeCycle.CreateFromText(text).ToSqlInsert());
