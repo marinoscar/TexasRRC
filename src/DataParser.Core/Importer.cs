@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using DataParser.Core.Entities;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace DataParser.Core
         /// <summary>
         /// Executes the import process by reading the source file and running SQL commands.
         /// </summary>
-        public void Execute()
+        public void Execute(string sessionID)
         {
             try
             {
@@ -42,24 +43,48 @@ namespace DataParser.Core
                 var reader = new FlatFileReader(_logger);
                 var sb = new StringBuilder();
                 var counter = 0;
-
+                var fileSize = file.Length;
+                var totalBytes = 0l;
+                var importStatus = new ImportProgress()
+                {
+                    SessionID = sessionID,
+                    FileName = file.Name,
+                    Status = "In Progress",
+                    StartTime = DateTime.Now,
+                    Progress = 0
+                };
                 using (var conn = new SqlConnection(_connectionString))
                 {
                     conn.Open();
+
+                    //sets the status to inprogress
+                    RunSql(importStatus.ToSqlInsert(), conn);
+
                     reader.WhileReadingLine(file, line =>
                     {
+                        totalBytes += line.Length;
                         sb.AppendLine(action(line));
                         counter++;
-                        if (counter > 200)
+                        if (counter > 500)
                         {
                             _logger.LogInformation($"Adding {counter} records for {file.Name}");
                             RunSql(sb.ToString(), conn);
+                            importStatus.Progress = ((decimal)totalBytes / fileSize) * 100;
+                            importStatus.UpdatedAt = DateTime.Now;
+                            RunSql(importStatus.ToSqlUpdate(), conn);
                             counter = 0;
                             sb.Clear();
                         }
                     });
                     if(sb.Length > 0)
                         RunSql(sb.ToString(), conn);
+
+                    // Update progress to 100% and mark as completed
+                    importStatus.Progress = 100;
+                    importStatus.EndTime = DateTime.Now;
+                    importStatus.Status = "Completed";
+                    importStatus.UpdatedAt = DateTime.Now;
+                    RunSql(importStatus.ToSqlUpdate(), conn);
                 }
             }
             catch (Exception ex)

@@ -3300,6 +3300,28 @@ EXEC sp_addextendedproperty
 
 GO
 
+-- Drop the table if it already exists
+IF OBJECT_ID('dbo.ImportProgress', 'U') IS NOT NULL
+    DROP TABLE dbo.ImportProgress;
+GO
+
+-- Create the table with ID as the primary key and an index on (SessionID, FileName)
+CREATE TABLE ImportProgress (
+    ID INT IDENTITY(1,1) PRIMARY KEY,
+    SessionID VARCHAR(50) NOT NULL,
+    FileName NVARCHAR(255) NOT NULL,
+    Status NVARCHAR(50) CHECK (Status IN ('Pending', 'In Progress', 'Completed', 'Failed')) NOT NULL,
+    Progress DECIMAL(5,2) CHECK (Progress BETWEEN 0 AND 100) NOT NULL DEFAULT 0,
+    StartTime DATETIME2 NULL,
+    EndTime DATETIME2 NULL,
+    CreatedAt DATETIME2 DEFAULT SYSDATETIME(),
+    UpdatedAt DATETIME2 DEFAULT SYSDATETIME()
+);
+
+-- Create a composite index on SessionID and FileName
+CREATE INDEX IDX_ImportProgress_SessionID_FileName ON ImportProgress(SessionID, FileName);
+
+
 
 -- ==============================================================================================
 -- END OF SCRIPT

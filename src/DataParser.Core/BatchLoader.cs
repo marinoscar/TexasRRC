@@ -39,6 +39,7 @@ namespace DataParser.Core
         {
             try
             {
+                var sessionId = Guid.NewGuid().ToString();
                 var sw = new Stopwatch();
                 sw.Start();
                 _logger.LogInformation("Starting data load from folder: {FolderName} with filter: {Filter}", folderName, filter);
@@ -53,7 +54,7 @@ namespace DataParser.Core
                 var files = directory.GetFiles(filter, SearchOption.AllDirectories);
                 foreach (var file in files)
                 {
-                    _tasks.Add(Task.Run(() => LoadFile(file)));
+                    _tasks.Add(Task.Run(() => LoadFile(file, sessionId)));
                 }
                 Task.WaitAll(_tasks.ToArray());
                 _logger.LogInformation("Data load completed successfully.");
@@ -67,11 +68,11 @@ namespace DataParser.Core
             }
         }
 
-        private void LoadFile(FileInfo file)
+        private void LoadFile(FileInfo file, string sessionId)
         {
             _logger.LogInformation("Processing file: {FileName}", file.FullName);
             var importer = new Importer(_connectionString, file.FullName, _logger);
-            importer.Execute();
+            importer.Execute(sessionId);
         }
     }
 }
